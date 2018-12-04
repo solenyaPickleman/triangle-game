@@ -1,36 +1,17 @@
 # triangle_game
-
-FIXME: description
+This is a Clojure implementation of a Cracker Barrel Triangle Peg game which simulates the game and then solves the generated game.
 
 ## Installation
-
-Download from http://example.com/FIXME.
+clone from git, use leiningen/clojure/java
 
 ## Usage
-
-FIXME: explanation
-
-    $ java -jar triangle_game-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
+lein run/ lein uberjar  and then run the jar
 
 ## Examples
+    1
+   1 1
+  1 0 1
+ 1 1 1 1
+1 1 1 1 1
 
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2018 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+and will then show the game board with solution. 
