@@ -2,6 +2,9 @@
   (:require [clojure.contrib.string :as string])
   (:gen-class))
 
+(def result-rankings '("" "You're genius" "You're purty smart" "You're just plain dump" "You're just plain 'eg-noor-a-moose'"))
+
+
 (defn get-peg "gets a peg or space" [is-peg]
   (if is-peg 0 1))
 
