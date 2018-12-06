@@ -34,23 +34,28 @@
 (defn print-game "print out a representation of the game" [game]
   (doseq [x game] (println (print-game-line x))))
 
+(defn get-moves-for-hole "given a game board and specific hole, give all possible moves for that peg"
+  [hole game]
+  (println hole)
+  '(1 2 3)
+  )
 ;play and solve game
 (defn get-moves "given a game board, gives all possible moves in the form of the potential game board"
   [game]
-  (loop [index 0 moves ()]
-    (if (= index (- (count (flatten game)) 1))
-      moves ;at this point ,all have been looped through so return the vector of potential game boards
-      (recur
-        (+ index 1)
-        (if (= (nth game index) 1)
-          moves
-          (concat (moves (get-moves-for-hole index game)))
-          )))))
 
-
-(defn get-moves-for-hole "given a game board and specific hole, give all possible moves for that peg"
-    [hole game] (
-    (def row (which-row peg)))
+  (def testaroo (loop [index 0 moves ()]
+                  (if (= index (- (count (flatten game)) 1))
+                    moves ;at this point ,all have been looped through so return the vector of potential game boards
+                    (recur
+                      (+ index 1)
+                      (if (= (nth (flatten game) index) 1)
+                        moves
+                        (concat moves (get-moves-for-hole index game))
+                        )))
+                  )
+    )
+  (println testaroo)
+  )
 
  (defn which-row "given a peg index, return integer corresponding to row 1-4"
     [i]
@@ -72,7 +77,7 @@
   (def game (start-game))
   (println "Initial board" )
   (print-game game)
-  (get-peg-moves 2 game)
+  (get-moves game)
   )
 
 
