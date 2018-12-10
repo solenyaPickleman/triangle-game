@@ -34,16 +34,70 @@
 (defn print-game "print out a representation of the game" [game]
   (doseq [x game] (println (print-game-line x))))
 
+;play and solve
+(defn which-row "given a peg index, return integer corresponding to row 1-4"
+  [i]
+  (cond
+    (< i 1) 0
+    (< i 3) 1
+    (< i 6) 2
+    (< i 10) 3
+    :else 4)
+  )
+(defn which-element-in-row "given a peg index, return position in row"
+  [i]
+  (cond
+    (< i 1) (- i 0)
+    (< i 3) (- i 1)
+    (< i 6) (- i 3)
+    (< i 10) (- i 6)
+       :else (- i 10)
+    )
+  )
+
+(defn get-moves-samerow "given a hole, row, and game board, returns all moves on the same row. Moves are returned as possible game boards"
+  [hole row game]
+  (if (< row 2)
+    '()
+    (do
+      (let [movegroups (partition 3 1 (nth game row))]
+        (def potential-moves
+          (filter #(reduce + %) (concat (filter #(= 0 (first %)) movegroups)
+                                        (filter #(= 0 (last %)) movegroups))))
+        (println potential-moves)
+        ;replace row with possible future rows
+        ;cast to string, substring replace with all possible options
+        (loop [ new-rows () ]
+        )
+
+      )
+    )
+  )
+
+(defn get-moves-above "given a hole, row, and game board, returns all moves from above the row. Moves are returned as possible game boards"
+  [hole row game]
+  '()
+  )
+
+(defn get-moves-below "given a hole, row, and game board, returns all moves from below the row.  Moves are returned as possible game boards"
+  [hole row game]
+  '()
+  )
+
 (defn get-moves-for-hole "given a game board and specific hole, give all possible moves for that peg"
   [hole game]
-  (println hole)
+  ;(def a (concat
+  ;  (get-moves-above hole (which-row hole) game)
+  ;  (get-moves-samerow hole (which-row hole) game)
+  ;  (get-moves-below hole (which-row hole) game)
+  ;  ))
+  (println (get-moves-samerow hole (which-row hole) game))
   '(1 2 3)
   )
-;play and solve game
+
 (defn get-moves "given a game board, gives all possible moves in the form of the potential game board"
   [game]
-
-  (def testaroo (loop [index 0 moves ()]
+  (loop [index 0 moves ()]
                   (if (= index (- (count (flatten game)) 1))
                     moves ;at this point ,all have been looped through so return the vector of potential game boards
                     (recur
@@ -53,21 +107,12 @@
                         (concat moves (get-moves-for-hole index game))
                         )))
                   )
-    )
-  (println testaroo)
   )
 
- (defn which-row "given a peg index, return integer corresponding to row 1-4"
-    [i]
-    (cond
-      (< i 1) 0
-      (< i 3) 1
-      (< i 6) 2
-      (< i 10) 3
-      :else 4)
-    )
+
 (defn get-surrounding "given a hole, get surrounding pegs #thats what she said"
   [hole game]
+
   )
 
 ;main
