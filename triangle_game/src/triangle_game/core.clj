@@ -67,9 +67,30 @@
         (println potential-moves)
         ;replace row with possible future rows
         ;cast to string, substring replace with all possible options
-        (loop [ new-rows () ]
-        )
+        ( loop [ moves potential-moves
+                 new_games () ]
+          (let [ rowstring (clojure.string/join (nth game row))
+                replace-with (clojure.string/join (map #(if (= 0 %) 1 0)  (first moves)))
+                hole-num (which-element-in-row hole)
 
+
+                ;(subvec (vec (first moves)) (- (which-element-in-row hole) 2) ( + 1 (which-element-in-row hole))))
+                ]
+            (println "Same-row" rowstring replace-with
+                     hole-num
+                     (str
+                       (subs rowstring 0 (if (= 0 (first (first moves)))
+                                           hole-num
+                                           ( - hole-num 2  )))
+                       replace-with
+                       (subs rowstring (if (= 0 (first (first moves)))
+                                         (do (println hole-num) (+ hole-num 3))
+                                         (do (println hole-num) ( + 1 hole-num))))))
+
+
+            )
+          )
+        )
       )
     )
   )
