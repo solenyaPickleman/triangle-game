@@ -72,28 +72,23 @@
           (let [ rowstring (clojure.string/join (nth game row))
                 replace-with (clojure.string/join (map #(if (= 0 %) 1 0)  (first moves)))
                 hole-num (which-element-in-row hole)
-
-
-                ;(subvec (vec (first moves)) (- (which-element-in-row hole) 2) ( + 1 (which-element-in-row hole))))
                 ]
-            (println "Same-row" rowstring replace-with
-                     hole-num
-                     (str
-                       (subs rowstring 0 (if (= 0 (first (first moves)))
-                                           hole-num
-                                           ( - hole-num 2  )))
-                       replace-with
-                       (subs rowstring (if (= 0 (first (first moves)))
-                                         (do (println hole-num) (+ hole-num 3))
-                                         (do (println hole-num) ( + 1 hole-num))))))
-
-
-            )
-          )
-        )
-      )
-    )
-  )
+            (println "hello" (count moves) new_games)
+            (if (= (count moves) 0)
+              new_games
+              (recur (rest moves)
+                   (conj new_games (conj
+                     (take-last (- 4 row) game )
+                     (reverse (into (list) (clojure.string/split  (str
+                          (subs rowstring 0 (if (= 0 (first (first moves)))
+                                              hole-num
+                                              ( - hole-num 2  )))
+                          replace-with
+                          (subs rowstring (if (= 0 (first (first moves)))
+                                            (do (+ hole-num 3))
+                                            (do ( + 1 hole-num))))) #"")))
+                     (take row game)))))
+            ))))))
 
 (defn get-moves-above "given a hole, row, and game board, returns all moves from above the row. Moves are returned as possible game boards"
   [hole row game]
@@ -130,20 +125,18 @@
                   )
   )
 
-
-(defn get-surrounding "given a hole, get surrounding pegs #thats what she said"
-  [hole game]
-
-  )
-
 ;main
 (defn -main
   "Build a random board of Cracker Barrel peg solitaire and solve that board"
   [& args]
   (def game (start-game))
   (println "Initial board" )
-  (print-game game)
-  (get-moves game)
+  ;(print-game game)
+  ;(get-moves game)
+
+
+  (print-game '((1) (1 1) (1 1 1) (1 1 1 1) (1 1 0 1 1)))
+  (get-moves '((1) (1 1) (1 1 1) (1 1 1 1) (1 1 0 1 1)))
   )
 
 
