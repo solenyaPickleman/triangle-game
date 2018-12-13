@@ -64,7 +64,7 @@
         (def potential-moves
           (filter #(reduce + %) (concat (filter #(= 0 (first %)) movegroups)
                                         (filter #(= 0 (last %)) movegroups))))
-        (println potential-moves)
+       ; (println potential-moves)
         ;replace row with possible future rows
         ;cast to string, substring replace with all possible options
         ( loop [ moves potential-moves
@@ -73,7 +73,6 @@
                 replace-with (clojure.string/join (map #(if (= 0 %) 1 0)  (first moves)))
                 hole-num (which-element-in-row hole)
                 ]
-            (println "hello" (count moves) new_games)
             (if (= (count moves) 0)
               new_games
               (recur (rest moves)
@@ -92,8 +91,31 @@
 
 (defn get-moves-above "given a hole, row, and game board, returns all moves from above the row. Moves are returned as possible game boards"
   [hole row game]
-  '()
-  )
+  (if (= row 0)
+    '()
+    (do
+      ;TODO write function that combines this and does the below ones as well... would save a lot of space. pass da function
+      (def left-move (loop [
+                            r row
+                            index (which-element-in-row hole)
+                            move '()]
+                       (if (or (< row 0) (< index 0) (= (count move) 3))
+                         (reverse move)
+                         (recur (- row 1) (- index 1) (conj move (nth (nth game row) index))))
+                       ))
+      (def right-move (loop [
+                            r row
+                            index (which-element-in-row hole)
+                            move '()]
+                       (if (or (>= row (count game )) (>= index (count (nth game row))) (= (count move) 3))
+                         (reverse move)
+                         (recur (- row 1) (+ index 1) (conj move (nth (nth game row) index))))
+                       ))
+      (println left-move right-move)
+      ;TODO check validity and return possible game states
+      )
+    ))
+
 
 (defn get-moves-below "given a hole, row, and game board, returns all moves from below the row.  Moves are returned as possible game boards"
   [hole row game]
@@ -107,7 +129,7 @@
   ;  (get-moves-samerow hole (which-row hole) game)
   ;  (get-moves-below hole (which-row hole) game)
   ;  ))
-  (println (get-moves-samerow hole (which-row hole) game))
+  (println (get-moves-above hole (which-row hole) game))
   '(1 2 3)
   )
 
@@ -121,9 +143,7 @@
                       (if (= (nth (flatten game) index) 1)
                         moves
                         (concat moves (get-moves-for-hole index game))
-                        )))
-                  )
-  )
+                        )))))
 
 ;main
 (defn -main
@@ -131,12 +151,10 @@
   [& args]
   (def game (start-game))
   (println "Initial board" )
-  ;(print-game game)
-  ;(get-moves game)
-
-
-  (print-game '((1) (1 1) (1 1 1) (1 1 1 1) (1 1 0 1 1)))
-  (get-moves '((1) (1 1) (1 1 1) (1 1 1 1) (1 1 0 1 1)))
+  (print-game game)
+  (get-moves game)
+  ;(print-game '((1) (1 1) (1 1 1) (1 1 1 1) (1 1 0 1 1)))
+  ;(get-moves '((1) (1 1) (1 1 1) (1 1 1 1) (1 1 0 1 1)))
   )
 
 
