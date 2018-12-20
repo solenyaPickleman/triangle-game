@@ -4,8 +4,7 @@
 
 (def result-rankings '("" "You're genius" "You're purty smart" "You're just plain dump" "You're just plain 'eg-noor-a-moose'"))
 
-;build game
-
+;this section builds a  game
 (defn get-peg "gets a peg or space" [is-peg]
   (if is-peg 0 1))
 
@@ -112,7 +111,7 @@
                             move '()]
                        (if (or (< r 0) (< index 0) (= (count move) 3))
                          (reverse move)
-                         (recur (- r 1) (- index 1) (conj move (nth (nth game r) index))))
+                         (recur (- r 1) (- index 1) (conj move (which-element-in-game r index))))
                        ))
       (def right-move (loop [
                             r row
@@ -120,7 +119,7 @@
                             move '()]
                        (if (or (>= r (count game )) (>= index (count (nth game r))) (= (count move) 3))
                          (reverse move)
-                         (recur (- r 1) (+ index 1) (conj move (nth (nth game r) index))))
+                         (recur (- r 1) (+ index 1) (conj move (which-element-in-game r index))))
                        ))
       (def movelist (filter #(= 3 (count %)) (list right-move left-move)))
       (loop [ moves (filter #(= 2 (reduce +
@@ -140,7 +139,6 @@
                                                                    ))))))
       )
     ))
-
 
 (defn get-moves-below "given a hole, row, and game board, returns all moves from below the row.  Moves are returned as possible game boards"
   [hole row game]
@@ -192,8 +190,8 @@
 
 (defn get-moves "given a game board, gives all possible moves in the form of the potential game board"
   [game]
-  (loop [index 0 moves ()]
-
+  (loop [index 0
+         moves ()]
                   (if (= index (count (flatten game)) )
                     moves ;at this point ,all have been looped through so return the vector of potential game boards
                     (recur
@@ -209,10 +207,15 @@
   [& args]
   (def game (start-game))
   (println "Initial board" )
-  ;(print-game game)
-  ;(get-moves game)
-  (print-game '((1) (1 1) (1 0 1) (1 1 1 1) (1 1 1 1 1)))
-  (doall (map print-game (get-moves '((1) (1 1) (1 0 1) (1 1 1 1) (1 1 1 1 1)))))
+  (print-game game)
+  ;TODO - write bit that recurs through games
+
+  (loop [games ( get-moves game)]
+    (if (= (count games) 0)
+      '()
+      (do
+        (print-game  (first games))
+        (recur (rest games)))))
   )
 
 
