@@ -84,7 +84,7 @@
                 hole-num (which-element-in-row hole)
                 ]
             (if (= (count moves) 0)
-              new_games
+              (map #(split-tree 1 (flatten %)) new_games)
               (recur (rest moves)
                    (conj new_games (conj
                      (take-last (- 4 row) game )
@@ -116,10 +116,10 @@
       (def right-move (loop [
                             r row
                             index (which-element-in-row hole)
-                            move '()]
+                            move '()]   ;TODO fix r = -1 error
                        (if (or (>= r (count game )) (>= index (count (nth game r))) (= (count move) 3))
                          (reverse move)
-                         (recur (- r 1) (+ index 1) (conj move (which-element-in-game r index))))
+                         (recur (- r 1)  index (conj move (which-element-in-game r index))))
                        ))
       (def movelist (filter #(= 3 (count %)) (list right-move left-move)))
       (loop [ moves (filter #(= 2 (reduce +
@@ -190,6 +190,7 @@
 
 (defn get-moves "given a game board, gives all possible moves in the form of the potential game board"
   [game]
+  (println "get-moves" game)
   (loop [index 0
          moves ()]
                   (if (= index (count (flatten game)) )
@@ -202,6 +203,10 @@
                         )))))
 
 ;main
+(defn make-int "ensures all elements in list are int"
+  [l]
+  (map #(if (= java.lang.String (type %)) (read-string %) %) l))
+
 (defn -main
   "Build a random board of Cracker Barrel peg solitaire and solve that board"
   [& args]
@@ -209,13 +214,21 @@
   (println "Initial board" )
   (print-game game)
   ;TODO - write bit that recurs through games
-
-  (loop [games ( get-moves game)]
-    (if (= (count games) 0)
-      '()
+  ;TODO - upper right not working
+  (loop [games (get-moves game)]
+    (if (< 0 (count (filter #(= 1 %)
+                       (map #(reduce + (make-int (flatten %))) games))))
+      (println "done" (filter #(= 1 %)(map #(reduce + (make-int (flatten %))) games)))
       (do
-        (print-game  (first games))
-        (recur (rest games)))))
-  )
+        (println (map #(reduce + (make-int (flatten %))) games))
+        (recur (reduce list (map #(get-moves %) games))))
+        )
+      )
+    )
+
+  ;(println (map #(reduce + (flatten %)) t))
+
+
+
 
 
