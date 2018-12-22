@@ -10,20 +10,24 @@
 
 (defn split-tree "takes a list and builds it into the game board format"
   ([point l]
+   ;(println l)
    (split-tree point l '() )
     )
   ([point l result]
    ( if (empty? l)
-     (reverse result)
-     (split-tree ( + point 1) (last (split-at point l)) (conj result (first (split-at point l))))
+     (into [] (reverse result))
+     (split-tree (+ point 1) (subvec l point) (conj result (subvec l 0 point)))
     )
   ))
 
-(defn start-game []
-  (def space (rand-int 15))
-  (def game (map #(get-peg (= % space)) (range 15)))
-  (split-tree 1 game )
+(defn start-game "initializes a random initial game board"
+  ([]
+  (start-game (rand-int 15)))
+  ([space]
+   (def game (vec (map #(get-peg (= % space)) (range 15))))
+   (split-tree 1 game ))
   )
+
 
 ;display game
 (defn print-game-line "takes a list and prints out a line of the game"
@@ -84,7 +88,7 @@
                 hole-num (which-element-in-row hole)
                 ]
             (if (= (count moves) 0)
-              (map #(split-tree 1 (flatten %)) new_games)
+              (map #(split-tree 1 (into [] (flatten %))) new_games)
               (recur (rest moves)
                    (conj new_games (conj
                      (take-last (- 4 row) game )
@@ -102,23 +106,30 @@
 (defn get-moves-above "given a hole, row, and game board, returns all moves from above the row. Moves are returned as possible game boards"
   [hole row game]
   (if (< row 2)
-    '() ; there are no moves in the first or second rows
+    '[] ; there are no moves in the first or second rows
     (do
       ;TODO write function that combines this and does the below ones as well... would save a lot of space. pass da function
       (def left-move (loop [
                             r row
                             index (which-element-in-row hole)
-                            move '()]
+                            move '[]]
                        (if (or (< r 0) (< index 0) (= (count move) 3))
-                         (reverse move)
+                         move
                          (recur (- r 1) (- index 1) (conj move (which-element-in-game r index))))
                        ))
+
+
+
       (def right-move (loop [
                             r row
                             index (which-element-in-row hole)
-                            move '()]   ;TODO fix r = -1 error
-                       (if (or (>= r (count game )) (>= index (count (nth game r))) (= (count move) 3))
-                         (reverse move)
+                            move '[]]   ;TODO fix r = -1 error
+                       (if (or
+                             (< r 0)
+                             (>= r (count game ))
+                             (>= index (count (nth game r)))
+                             (= (count move) 3))
+                         move
                          (recur (- r 1)  index (conj move (which-element-in-game r index))))
                        ))
       (def movelist (filter #(= 3 (count %)) (list right-move left-move)))
@@ -129,10 +140,10 @@
                                               (nth g (second %))
                                               (nth g (nth % 2))))))
                             movelist )
-             new_games () ]
+             new_games [] ]
         (if ( = (count moves) 0)
           new_games
-          (recur (rest moves) (conj new_games (split-tree 1 (apply list
+          (recur (rest moves) (conj new_games (split-tree 1 (into []
                                                                    (assoc
                                                                      (assoc  (assoc (vec (flatten game)) (first (first moves)) 1) (second (first moves)) 0)
                                                                      (nth (first moves) 2) 0)
@@ -149,17 +160,17 @@
       (def left-move (loop [
                             r row
                             index (which-element-in-row hole)
-                            move '()]
+                            move '[]]
                        (if (or (< r 0) (< index 0) (= (count move) 3))
-                         (reverse move)
+                         move
                          (recur (+ r 1) index (conj move (which-element-in-game r index))))
                        ))
       (def right-move (loop [
                              r row
                              index (which-element-in-row hole)
-                             move '()]
-                        (if (or (>= r (count game )) (>= index (count (nth game r))) (= (count move) 3))
-                          (reverse move)
+                             move '[]]
+                        (if (or (< r 0) (>= r (count game )) (>= index (count (nth game r))) (= (count move) 3))
+                           move
                           (recur (+ r 1) (+ index 1) (conj move (which-element-in-game r index))))
                         ))
       (def movelist (filter #(= 3 (count %)) (list right-move left-move)))
@@ -170,10 +181,10 @@
                                               (nth g (second %))
                                               (nth g (nth % 2))))))
                                           movelist)
-              new_games () ]
+              new_games [] ]
         (if ( = (count moves) 0)
           new_games
-          (recur (rest moves) (conj new_games (split-tree 1 (apply list
+          (recur (rest moves) (conj new_games (split-tree 1 (into []
                                                 (assoc
                                                   (assoc  (assoc (vec (flatten game)) (first (first moves)) 1) (second (first moves)) 0)
                                                   (nth (first moves) 2) 0)
@@ -190,7 +201,6 @@
 
 (defn get-moves "given a game board, gives all possible moves in the form of the potential game board"
   [game]
-  (println "get-moves" game)
   (loop [index 0
          moves ()]
                   (if (= index (count (flatten game)) )
@@ -205,27 +215,43 @@
 ;main
 (defn make-int "ensures all elements in list are int"
   [l]
-  (map #(if (= java.lang.String (type %)) (read-string %) %) l))
+  (into '[] (map #(if (= java.lang.String (type %)) (read-string %) %) l)))
 
 (defn -main
   "Build a random board of Cracker Barrel peg solitaire and solve that board"
   [& args]
-  (def game (start-game))
-  (println "Initial board" )
-  (print-game game)
-  ;TODO - write bit that recurs through games
-  ;TODO - upper right not working
-  (loop [games (get-moves game)]
-    (if (< 0 (count (filter #(= 1 %)
-                       (map #(reduce + (make-int (flatten %))) games))))
-      (println "done" (filter #(= 1 %)(map #(reduce + (make-int (flatten %))) games)))
-      (do
-        (println (map #(reduce + (make-int (flatten %))) games))
-        (recur (reduce list (map #(get-moves %) games))))
-        )
-      )
-    )
 
+  (loop [run 0]
+    (if (> run 14)
+      '[]
+      (do
+        (let [game (start-game run)]
+         (println "Initial board")
+         (print-game game)
+         (doall (map #(print-game %) (doall (get-moves game))))
+         )
+        (recur (+ run 1))
+      ))))
+
+
+  ;(def game (start-game))
+  ;
+  ;
+  ;(println "Initial board")
+  ;(print-game game)
+  ;;TODO - write bit that recurs through games
+  ;;TODO - upper right not working
+  ;(println (get-moves game))
+  ;(loop [games (get-moves game)]
+  ;  (if (< 0 (count (filter #(= 1 %)
+  ;                     (map #(reduce + (make-int (flatten %))) games))))
+  ;    (println "done" (filter #(= 1 %)(map #(reduce + (make-int (flatten %))) games)))
+  ;    (do
+  ;      (println (map #(reduce + (make-int (flatten %))) games))
+  ;      (recur (reduce list (map #(get-moves %) games))))
+  ;      )
+  ;    )
+  ;  )
   ;(println (map #(reduce + (flatten %)) t))
 
 
