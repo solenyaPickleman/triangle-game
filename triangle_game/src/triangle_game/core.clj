@@ -200,7 +200,7 @@
 
 (defn get-moves "given a game board, gives all possible moves in the form of the potential game board"
   [game]
-  (if (not ( = 15 (count game))) 
+  (if ( = 15 (count game)) '[]
   (loop [index 0
          moves []]
     (if (= index (count (flatten game)))
@@ -210,7 +210,7 @@
         (if (= (nth (flatten game) index) 1)
           moves
           (into [] (concat moves (get-moves-for-hole index game)))
-          )))))
+          ))))))
 
 ;main
 (defn -main
@@ -230,16 +230,18 @@
   ;    ))))
 
   (loop [games (start-game 3)
-         first true]
-    (if (some true? (map #(= 8 (reduce + (make-int (flatten %)))) games))
-      (doall (map #(print-game %) (doall (get-moves game))))
+         first true
+         sum 14]
+    (if (and (not first) (some true? (map #(= 1 (reduce + (make-int (flatten %)))) games)))
+      (println (into [] (filter #(= 1 (reduce + (make-int (flatten %)))) games)))
       (do
-        (if first (print-game games) (do (println games) (doall (map #(print-game %) games))))
-        (recur
-          (if first
-            (get-moves games)
-            (into [] (mapcat vec (map #(get-moves (make-int %)) games))))
-          false))))
+        (let [ testarino (into [] (set (filter #(<= sum (reduce + (make-int (flatten %)))) games)))]
+          (recur
+            (if first
+              (get-moves games)
+              (into [] (mapcat vec (map #(get-moves (make-int %)) testarino))))
+            false
+              (- sum 1))))))
   )
 
 
