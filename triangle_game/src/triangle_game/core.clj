@@ -217,32 +217,24 @@
   "Build a random board of Cracker Barrel peg solitaire and solve that board"
   [& args]
 
-  ;(loop [run 0]
-  ;  (if (> run 14)
-  ;    '[]
-  ;    (do
-  ;      (let [game (start-game run)]
-  ;       (println "Initial board")
-  ;       (print-game game)
-  ;       (doall (map #(print-game %) (doall (get-moves game))))
-  ;       )
-  ;      (recur (+ run 1))
-  ;    ))))
-
-  (loop [games (start-game 3)
+  (loop [games (start-game 0)
          first true
          sum 14]
-    (if (and (not first) (some true? (map #(= 1 (reduce + (make-int (flatten %)))) games)))
+    (if (and (not first) (->> games
+                              (map #(= 1  (reduce + (make-int (flatten %)))))
+                              (some true?)
+                              ))
       (println (into [] (filter #(= 1 (reduce + (make-int (flatten %)))) games)))
       (do
-        (let [ testarino (into [] (set (filter #(<= sum (reduce + (make-int (flatten %)))) games)))]
+        (let [ valid-games (into [] (set (filter #(<= sum (reduce + (make-int (flatten %)))) games)))]
           (recur
             (if first
               (get-moves games)
-              (into [] (mapcat vec (map #(get-moves (make-int %)) testarino))))
+              (into [] (mapcat vec (map #(get-moves (make-int %)) valid-games))))
             false
               (- sum 1))))))
   )
+
 
 
 
