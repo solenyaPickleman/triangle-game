@@ -213,8 +213,9 @@
          sum 14]
 
     (if (zero? sum)
-      (spit "C:\\Users\\brady\\trees.edn"  (with-out-str (pr results)))
+      (spit "C:\\Users\\brady\\trees2.edn"  (with-out-str (pr results)))
       (let [valid-games (into [] (set (filter #(<= sum (reduce +  (flatten %))) g)))]
+        (println (count valid-games))
         (recur
           (into [] (mapcat vec (map #(get-moves %) valid-games)))
           (conj results (into {} (map do-turn valid-games)))
