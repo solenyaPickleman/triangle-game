@@ -188,18 +188,6 @@
           (into [] (concat moves (get-moves-for-hole index game)))
           )))))
 
-;(defn branch "zipper branching function"
-;  [game]
-;  (let [newgames (get-moves game)]
-;    (or
-;      (some #( < 1 (reduce + (flatten %))) newgames)
-;      (some #(< (reduce + (flatten %)) (reduce + (flatten game))) newgames)
-;      )
-;    ))
-;(defn fast-forward [loc]
-;  (if (= 1 (reduce + (flatten (zip/node loc))))
-;    (zip/node loc)
-;    (recur (zip/next loc))))
 
 (defn keyify
   [l]
@@ -220,7 +208,6 @@
   [& args]
   (def games (map start-game (range 15)))
 
-
   (loop [g games
          results '[]
          sum 14]
@@ -237,6 +224,7 @@
       )
     )
   )
+
 
 
 
