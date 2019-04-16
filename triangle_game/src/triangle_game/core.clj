@@ -198,9 +198,30 @@
   [game ]
   (let [moves (get-moves game)
         results '{}]
-    (assoc results (keyify game) moves)
+    (assoc results (keyify game) (map keyify moves))
     )
   )
+
+
+(defn add-paths "takes a list of all possible moves and the current pathlists and adds a level"
+  [flats paths]
+  (print (count paths) (count (last paths)))
+  (loop [path (first paths)
+         nextpaths (rest paths)
+         results '[]]
+    (if (empty? path)
+      (into [] (set results))
+      (let [nextmoves (->> (filter #(= (last path) (first (first %))) flats)
+                           (map #(last (first %)))
+                           vec
+                           )]
+        (recur
+          (first nextpaths)
+          (rest nextpaths)
+          (into [] (concat results (map #(conj path %) nextmoves)))
+          )))))
+
+
 
 
 (defn -main
@@ -213,7 +234,7 @@
          sum 14]
 
     (if (zero? sum)
-      (spit "C:\\Users\\brady\\trees2.edn"  (with-out-str (pr results)))
+      (spit "C:\\Users\\brady\\trees.edn"  (with-out-str (pr results)))
       (let [valid-games (into [] (set (filter #(<= sum (reduce +  (flatten %))) g)))]
         (println (count valid-games))
         (recur
@@ -226,6 +247,75 @@
     )
   )
 
+(defn build-lists "reads the outputted file will all possible game moves, and turns it into a list of successful game paths"
+  []
+  ;read in a list of possible game outcomes - arrange from end state ->> start state
+  (def possibles (into [] (reverse (read-string (slurp "C:\\Users\\brady\\trees.edn")))))
+  (print (map count possibles))
+  ;loop through all possibilities,and filter out early leaves
+  (def winners
+    (loop [level (first possibles)
+           nextLevels (rest possibles)
+           wins '[]]
+      (if (empty? level)
+        (rest wins)
+        (recur
+          (first nextLevels)
+          (rest nextLevels)
+          (conj wins
+                (select-keys level (filter #(< 0 (count (get level %))) (keys level)))))))
+    )
+  (print (map count winners))
+  ;go through winners, and build out successful game paths
+  ; to go from string -> board (split-tree (into [] (map parse-int (string/split #"" "000100100000000"))))
+
+  ;get list of values (reduce concat (keys (clojure.set/map-invert hm)))
+  (def flats '[])
+  (for [hm winners]
+    (for [k (reduce concat (keys (clojure.set/map-invert hm)))
+          :let [values (filter #(some #{k} (get hm %)) (keys hm))]
+          ]
+      (def flats (into [] (concat flats (map #(into [] {k %}) values)))))
+    )
+
+  (def endstates (vec (into #{} (reduce concat (keys (clojure.set/map-invert (first winners)))))))
+
+  (def paths '[])
+  (for [state endstates
+        :let [nextmoves (->> (filter #(= state (first (first %))) flats )
+                             (map #(last (first %)))
+                             vec
+                             )]]
+    (def paths (into [] (concat paths (map #(first (into [] {state %})) nextmoves) )))
+    )
+  (def doesitwork
+    (->> paths
+       (add-paths flats )
+       (add-paths flats )
+       (add-paths flats )
+       (add-paths flats )
+       (add-paths flats )
+       (add-paths flats )
+       (add-paths flats )
+       (add-paths flats )
+       (add-paths flats )
+       (add-paths flats )
+       (add-paths flats )
+       (add-paths flats )
+       ))
+
+
+  (loop [p paths]
+    (print (count p) (last p))
+    (if (= 13 (count (last p)))
+      p
+      (recur (add-paths flats p)))
+    )
+;(into [] concat p
+
+  (add-paths flats paths)
+
+    )
 
 
 
